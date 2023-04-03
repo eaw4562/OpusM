@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<!-- res/layout/activity_main.xml -->
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -7,6 +7,7 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
+    <!-- 기존 레이아웃 -->
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/my_toolbar"
         android:layout_width="match_parent"
@@ -24,16 +25,17 @@
                 android:layout_weight="1"
                 android:src="@drawable/logo" />
 
-            <TextView
+            <Button
+                android:id="@+id/btn_network"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="테스트"
+                android:text="네트워크"
+                android:textColor="@color/black"
+                android:background="@drawable/button_rounded_corner"
                 android:layout_marginStart="8dp" />
 
         </LinearLayout>
-
-
     </androidx.appcompat.widget.Toolbar>
 
     <FrameLayout
