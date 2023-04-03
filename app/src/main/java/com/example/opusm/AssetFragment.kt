@@ -5,11 +5,6 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 
 
 class AssetFragment : Fragment() {
@@ -19,6 +14,6 @@ class AssetFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.AssetFragmet, container, false)
+        return inflater.inflate(R.layout.fragment_asset, container, false)
     }
 }

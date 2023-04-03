@@ -9,8 +9,10 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         // 프래그먼트 매니저를 통해 프래그먼트 트랜잭션 시작
-        supportFragmentManager.beginTransaction()
-            .add(R.id.fragment_container, MainFragment())
-            .commit()
+        val fragmentManager = supportFragmentManager
+        val transaction = fragmentManager.beginTransaction()
+        transaction.replace(R.id.fragment_container, MainFragment())
+        transaction.commit()
+
     }
 }

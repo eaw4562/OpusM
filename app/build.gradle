@@ -7,6 +7,10 @@ android {
     namespace 'com.example.opusm'
     compileSdk 33
 
+    buildFeatures{
+        viewBinding = true
+    }
+
     defaultConfig {
         applicationId "com.example.opusm"
         minSdk 30
