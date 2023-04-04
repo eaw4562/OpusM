@@ -5,6 +5,9 @@ import android.os.Bundle
 import android.view.*
 import android.widget.Button
 import android.widget.PopupWindow
+import androidx.appcompat.widget.AppCompatImageButton
+import androidx.core.view.GravityCompat
+import androidx.drawerlayout.widget.DrawerLayout
 
 class MainActivity : AppCompatActivity() {
 
@@ -20,11 +23,19 @@ class MainActivity : AppCompatActivity() {
         transaction.replace(R.id.fragment_container, MainFragment())
         transaction.commit()
 
-        val testButton: Button = findViewById(R.id.btn_network)
+        val testButton = findViewById<AppCompatImageButton>(R.id.header_network)
         testButton.setOnClickListener {
             showNetworkDropdown(testButton)
         }
+
+        val drawLayout = findViewById<DrawerLayout>(R.id.drawer_layout)
+        val headerProfile = findViewById<AppCompatImageButton>(R.id.header_profile)
+
+        headerProfile.setOnClickListener {
+            drawLayout.openDrawer(GravityCompat.END)
+        }
     }
+
 
     private fun showNetworkDropdown(anchorView: View) {
         val layoutInflater = getSystemService(LAYOUT_INFLATER_SERVICE) as LayoutInflater
