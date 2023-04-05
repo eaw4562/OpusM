@@ -2,27 +2,38 @@ package com.example.opusm
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.*
-import android.widget.Button
-import android.widget.ListView
+import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.PopupWindow
+import android.widget.TextView
 import androidx.appcompat.widget.AppCompatImageButton
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
-import com.example.opusm.dto.AccountInfo
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.coroutineScope
+import androidx.lifecycle.get
+import com.example.opusm.databinding.NavHeaderBinding
+import com.example.opusm.dto.Account
 import com.google.android.material.navigation.NavigationView
-import com.example.opusm.adapter.AccountInfoAdapter
+import kotlinx.coroutines.*
+import org.koin.androidx.scope.lifecycleScope
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var popupWindow: PopupWindow
-    private val accountList = mutableListOf<AccountInfo>()
+    private lateinit var userViewModel: UserViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // 프래그먼트 매니저를 통해 프래그먼트 트랜잭션 시작
+        val accountDao = AppDatabase.getDatabase(this).accountDao()
+        val accountRepository = AccountRepository(accountDao)
+        val userViewModelFactory = UserViewModelFactory(accountRepository)
+        userViewModel = ViewModelProvider(this, userViewModelFactory)[UserViewModel::class.java]
+
         val fragmentManager = supportFragmentManager
         val transaction = fragmentManager.beginTransaction()
         transaction.replace(R.id.fragment_container, MainFragment())
@@ -33,27 +44,45 @@ class MainActivity : AppCompatActivity() {
             showNetworkDropdown(testButton)
         }
 
-        //네비게이션 드로어
         val drawLayout = findViewById<DrawerLayout>(R.id.drawer_layout)
         val headerProfile = findViewById<AppCompatImageButton>(R.id.header_profile)
-
         headerProfile.setOnClickListener {
             drawLayout.openDrawer(GravityCompat.END)
         }
 
-        // 네비게이션 리스트뷰 초기화
-        val headerView = findViewById<NavigationView>(R.id.navigation_view).getHeaderView(0)
-        val listView = headerView.findViewById<ListView>(R.id.account_list_view)
-        val accountList = mutableListOf<AccountInfo>(
-            AccountInfo("계정1", "100 ETH", R.drawable.logo),
-            AccountInfo("계정2", "50 ETH", R.drawable.download),
-            AccountInfo("계정3", "20 ETH", R.drawable.wallet)
-        )
-        val adapter = AccountInfoAdapter(this, accountList)
-        listView.adapter = adapter
+        val navView = findViewById<NavigationView>(R.id.navigation_view)
+        val binding = NavHeaderBinding.bind(navView.getHeaderView(0))
+        val lifecycleScope = this.lifecycle.coroutineScope
+
+        binding.headerAccount1.setOnClickListener {
+            userViewModel.loadAccounts().observe(this) { accountList ->
+                val selectedAccount = accountList.getOrNull(0)
+                selectedAccount?.let {
+                    userViewModel.selectAccount(it)
+                    binding.headerNowAccount.text = it.username
+                    popupWindow.dismiss()
+                }
+            }
+        }
+
+        binding.headerAccount2.setOnClickListener {
+            userViewModel.loadAccounts().observe(this) { accountList ->
+                val selectedAccount = accountList.getOrNull(1)
+                selectedAccount?.let {
+                    userViewModel.selectAccount(it)
+                    binding.headerNowAccount.text = it.username
+                    popupWindow.dismiss()
+                }
+            }
+        }
+
+
+
+
+        val selectedAccount = runBlocking {
+            userViewModel.getSelectedAccount()
+        }
     }
-
-
 
     private fun showNetworkDropdown(anchorView: View) {
         val layoutInflater = getSystemService(LAYOUT_INFLATER_SERVICE) as LayoutInflater
@@ -69,5 +98,4 @@ class MainActivity : AppCompatActivity() {
         anchorView.getLocationInWindow(location)
         popupWindow.showAtLocation(anchorView, Gravity.NO_GRAVITY, 0, location[1] + anchorView.height)
     }
-
 }

@@ -1,16 +1,26 @@
 package com.example.opusm.interfac
 
+import android.util.Log
+import androidx.lifecycle.LiveData
 import androidx.room.*
+import com.example.opusm.dto.Account
 import com.example.opusm.dto.AccountInfo
 
 @Dao
 interface AccountInfoDao {
-    @Query("SELECT * FROM account_info")
-    suspend fun getAllAccountInfos(): List<AccountInfo>
+   /* @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(accountInfo: AccountInfo)*/
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAccountInfo(accountInfo: AccountInfo)
+    suspend fun insertSelectedAccount(account: Account) {
+        Log.d("AccountDao", "Inserted account: $account")
+    }
 
-    @Delete
-    suspend fun deleteAccountInfo(accountInfo: AccountInfo)
+    @Query("SELECT * FROM accounts WHERE id = :id")
+    suspend fun getAccountInfoById(id: Int): AccountInfo?
+
+    @Query("SELECT * FROM accounts")
+    fun getAllAccountInfo(): LiveData<List<AccountInfo>>
+
+
 }
