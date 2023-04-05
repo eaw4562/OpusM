@@ -1,38 +1,39 @@
 package com.example.opusm
 
-import androidx.appcompat.app.AppCompatActivity
+import android.content.SharedPreferences
 import android.os.Bundle
-import android.util.Log
-import android.view.*
-import android.widget.ImageView
-import android.widget.LinearLayout
+import android.preference.PreferenceManager
+import android.view.Gravity
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.PopupWindow
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatImageButton
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.coroutineScope
-import androidx.lifecycle.get
+import com.example.opusm.SharedPreferencesUtil.saveSelectedAccountUsername
+import com.example.opusm.databinding.ActivityMainBinding
 import com.example.opusm.databinding.NavHeaderBinding
-import com.example.opusm.dto.Account
 import com.google.android.material.navigation.NavigationView
-import kotlinx.coroutines.*
-import org.koin.androidx.scope.lifecycleScope
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var popupWindow: PopupWindow
-    private lateinit var userViewModel: UserViewModel
+    private lateinit var sharedPreferences: SharedPreferences
+    private lateinit var selectedAccountTextView: TextView
+    private lateinit var navHeaderBinding: NavHeaderBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        val binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        navHeaderBinding = NavHeaderBinding.bind(binding.navigationView.getHeaderView(0))
 
-        val accountDao = AppDatabase.getDatabase(this).accountDao()
-        val accountRepository = AccountRepository(accountDao)
-        val userViewModelFactory = UserViewModelFactory(accountRepository)
-        userViewModel = ViewModelProvider(this, userViewModelFactory)[UserViewModel::class.java]
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
 
         val fragmentManager = supportFragmentManager
         val transaction = fragmentManager.beginTransaction()
@@ -50,37 +51,20 @@ class MainActivity : AppCompatActivity() {
             drawLayout.openDrawer(GravityCompat.END)
         }
 
-        val navView = findViewById<NavigationView>(R.id.navigation_view)
-        val binding = NavHeaderBinding.bind(navView.getHeaderView(0))
-        val lifecycleScope = this.lifecycle.coroutineScope
-
-        binding.headerAccount1.setOnClickListener {
-            userViewModel.loadAccounts().observe(this) { accountList ->
-                val selectedAccount = accountList.getOrNull(0)
-                selectedAccount?.let {
-                    userViewModel.selectAccount(it)
-                    binding.headerNowAccount.text = it.username
-                    popupWindow.dismiss()
-                }
-            }
+        navHeaderBinding.headerUsername1.setOnClickListener {
+            saveSelectedAccountUsername(navHeaderBinding.headerUsername1.text.toString())
+            selectedAccountTextView.text = navHeaderBinding.headerUsername1.text
         }
 
-        binding.headerAccount2.setOnClickListener {
-            userViewModel.loadAccounts().observe(this) { accountList ->
-                val selectedAccount = accountList.getOrNull(1)
-                selectedAccount?.let {
-                    userViewModel.selectAccount(it)
-                    binding.headerNowAccount.text = it.username
-                    popupWindow.dismiss()
-                }
-            }
+        navHeaderBinding.headerUsername2.setOnClickListener {
+            saveSelectedAccountUsername(navHeaderBinding.headerUsername2.text.toString())
+            selectedAccountTextView.text = navHeaderBinding.headerUsername2.text
         }
 
-
-
-
-        val selectedAccount = runBlocking {
-            userViewModel.getSelectedAccount()
+        selectedAccountTextView = navHeaderBinding.headerNowAccount
+        val selectedUsername = getSelectedAccountUsername()
+        if (selectedUsername != null) {
+            selectedAccountTextView.text = selectedUsername
         }
     }
 
@@ -88,7 +72,12 @@ class MainActivity : AppCompatActivity() {
         val layoutInflater = getSystemService(LAYOUT_INFLATER_SERVICE) as LayoutInflater
         val popupView = layoutInflater.inflate(R.layout.network_dropdown_layout, null)
 
-        popupWindow = PopupWindow(popupView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, true)
+        popupWindow = PopupWindow(
+            popupView,
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+            true
+        )
 
         popupWindow.isOutsideTouchable = true
         popupWindow.isTouchable = true
@@ -96,6 +85,21 @@ class MainActivity : AppCompatActivity() {
 
         val location = IntArray(2)
         anchorView.getLocationInWindow(location)
-        popupWindow.showAtLocation(anchorView, Gravity.NO_GRAVITY, 0, location[1] + anchorView.height)
+        popupWindow.showAtLocation(
+            anchorView,
+            Gravity.NO_GRAVITY,
+            0,
+            location[1] + anchorView.height
+        )
+    }
+
+    private fun saveSelectedAccountUsername(username: String) {
+        sharedPreferences.edit().putString("selected_account_username", username).apply()
+        navHeaderBinding.headerNowAccount.text = username
+    }
+
+
+    private fun getSelectedAccountUsername(): String? {
+        return sharedPreferences.getString("selected_account_username", null)
     }
 }
