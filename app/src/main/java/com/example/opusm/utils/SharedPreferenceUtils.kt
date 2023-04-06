@@ -1,4 +1,4 @@
-package com.example.opusm
+package com.example.opusm.utils
 
 import android.content.Context
 import android.content.SharedPreferences
@@ -22,7 +22,7 @@ object SharedPreferencesUtil {
         return getSharedPreferences(context).getString(SELECTED_ACCOUNT_USERNAME_KEY, null)
     }
 
-    fun saveSelectedNetWork(context: Context, network: String?) {
+fun saveSelectedNetWork(context: Context, network: String?) {
         getSharedPreferences(context).edit {
             putString(SELECTED_ACCOUNT_USERNAME_KEY, network)
         }
