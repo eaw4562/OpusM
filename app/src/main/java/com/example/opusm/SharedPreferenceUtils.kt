@@ -21,4 +21,14 @@ object SharedPreferencesUtil {
     fun getSelectedAccountUsername(context: Context): String? {
         return getSharedPreferences(context).getString(SELECTED_ACCOUNT_USERNAME_KEY, null)
     }
+
+    fun saveSelectedNetWork(context: Context, network: String?) {
+        getSharedPreferences(context).edit {
+            putString(SELECTED_ACCOUNT_USERNAME_KEY, network)
+        }
+    }
+
+    fun getSelectedNetWork(context: Context): String? {
+        return getSharedPreferences(context).getString(SELECTED_ACCOUNT_USERNAME_KEY, null)
+    }
 }

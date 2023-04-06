@@ -59,13 +59,10 @@
             android:layout_marginTop="20dp"
             android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/tv_network"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textColor="@color/white"
-                android:text="이더리움 메인넷" />
+            <ListView
+                android:id="@+id/network_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
         </LinearLayout>
 
             <LinearLayout
