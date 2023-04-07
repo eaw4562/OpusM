@@ -12,4 +12,8 @@ interface UpbitService {
 
     @GET("v1/ticker")
     suspend fun getTicker(@Query("markets") markets: String): List<TickerData>
+
+   /* @GET("v1/ticker?market=KRW-ETH")
+    suspend fun getTicker(@Query("markets") markets: String): List<TickerData>
+}*/
 }

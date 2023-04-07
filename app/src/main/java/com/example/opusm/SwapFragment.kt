@@ -6,17 +6,21 @@ import android.text.TextWatcher
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import androidx.core.widget.doAfterTextChanged
-import androidx.lifecycle.ViewModelProvider
+import androidx.appcompat.widget.SwitchCompat
 import com.example.opusm.adapter.CoinSpinnerAdapter
 import com.example.opusm.databinding.FragmentSwapBinding
 import com.example.opusm.model.Coin
 import com.example.opusm.model.CoinSpinnerItem
 import com.example.opusm.model.TickerData
 import com.example.opusm.utils.UpbitServiceBuilder
+import com.skydoves.balloon.ArrowPositionRules
+import com.skydoves.balloon.Balloon
+import com.skydoves.balloon.BalloonAnimation
+import com.skydoves.balloon.BalloonSizeSpec
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -30,16 +34,36 @@ class SwapFragment : Fragment() {
     private lateinit var selectedCoin: CoinSpinnerItem
     private var tickerData: TickerData? = null
 
+
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentSwapBinding.inflate(inflater, container, false)
 
+        val tranSwitch = binding.tranSwitch
+        val tranStateText = binding.tranStateText
+
+        tranSwitch.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                tranStateText.text = "켜기"
+            } else {
+                tranStateText.text = "끄기"
+            }
+        }
+
         // Spinner Adapter 설정
         val coinSpinnerItemList = mutableListOf<CoinSpinnerItem>()
         coinSpinnerAdapter = CoinSpinnerAdapter(requireContext(), coinSpinnerItemList)
         binding.assetHoldcoinListView.adapter = coinSpinnerAdapter
+
+        binding.advancedOptionsTextview.setOnClickListener {
+            val layout = binding.advancedOptionsLayout
+            layout.visibility = if (layout.visibility == View.GONE) View.VISIBLE else View.GONE
+        }
+
+
 
         // Upbit API를 이용해 특정 코인 목록 가져오기
         GlobalScope.launch(Dispatchers.IO) {
@@ -96,7 +120,8 @@ class SwapFragment : Fragment() {
         if (tickerData != null) {
             val holdCoinCount = binding.assetHoldcoin.text.toString().toDoubleOrNull() ?: 0.0
             val result = holdCoinCount * tickerData!!.trade_price
-            binding.currentPriceTextview.text = result.toString()
+            binding.currentPriceTextview.text = String.format("%.2f", result)
         }
     }
+
 }
